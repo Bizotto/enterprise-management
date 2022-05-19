@@ -8,6 +8,7 @@
 #include <direct.h>
 
 void MenuCli();
+void MenuForn();
 void menuPrincipal();
 
 using namespace std;
@@ -112,6 +113,7 @@ void cadastrarCliente()
     op = toupper(op);
   } while (op == 'S');
   fclose(fClientes);
+  MenuCli();
 }
 
 void consultarCliente()
@@ -132,6 +134,7 @@ void consultarCliente()
   }
   printf("\n fim do arquivo");
   fclose(fClientes);
+  MenuCli();
   getch();
 }
 
@@ -178,6 +181,7 @@ void consultarNomeCliente()
     }
     getch();
   }
+  MenuCli();
 }
 
 void alterarCliente()
@@ -219,6 +223,7 @@ void alterarCliente()
     getch();
   }
   fclose(fClientes);
+  MenuCli();
 }
 
 void excluirCliente()
@@ -273,6 +278,7 @@ void excluirCliente()
   fclose(fClientes);
   printf("\n Cliente ExcluÝdo - Digite <enter> para continuar___________________\n");
   getch();
+  MenuCli();
 }
 
 void excluirArquivoCliente()
@@ -289,7 +295,7 @@ void excluirArquivoCliente()
 
   else
   {
-    printf("\n Arquivo nÒo foi deletado por sua opþÒo");
+    printf("\n Arquivo nao foi deletado por sua opcao");
     getch();
   }
   criarArquivoCliente();
@@ -392,6 +398,7 @@ void cadastrarFornecedor()
     op = toupper(op);
   } while (op == 'S');
   fclose(fFornecedores);
+  MenuForn();
 }
 
 void consultarFornecedor()
@@ -414,6 +421,7 @@ void consultarFornecedor()
   printf("\n fim do arquivo");
   fclose(fFornecedores);
   getch();
+  MenuForn();
 }
 void consultarNomeFornecedor()
 {
@@ -457,6 +465,7 @@ void consultarNomeFornecedor()
       fclose(fFornecedores);
     }
     getch();
+    MenuForn();
   }
 }
 void alterarFornecedor()
@@ -498,6 +507,7 @@ void alterarFornecedor()
     getch();
   }
   fclose(fFornecedores);
+  MenuForn();
 }
 
 void excluirFornecedor()
@@ -555,6 +565,7 @@ void excluirFornecedor()
   fclose(fFornecedores);
   printf("\n Fornecedor ExcluÝdo - Digite <enter> para continuar___________________\n");
   getch();
+  MenuForn();
 }
 
 void excluirArquivoFornecedor()
