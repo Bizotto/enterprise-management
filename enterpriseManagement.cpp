@@ -5,22 +5,24 @@
 #include <ctype.h>
 #include <io.h>
 #include <string.h>
+#include <dos.h>
+#include <locale.h>
 #include <direct.h>
 
-void MenuCli();
-void MenuForn();
 void menuPrincipal();
+void menuCliente();
+void menuFornenecedor();
+void menuFuncionario();
+void menuProdutos();
 
 using namespace std;
 
 struct dadosCli
 {
   char nomeCli[20];
-  char CPFC[20];
   int idadeCli;
-  float sbaseCli;
+  float salarioCli;
   float vcomprasCli;
-
 } Cliente;
 
 struct dadosForn
@@ -31,111 +33,169 @@ struct dadosForn
   char cnpj[20];
 } Fornecedor;
 
-struct dadosProd
-{
-  int codprod;
-  char nomeprod[30];
-  float valorUniprod;
-
-} Produto;
-
 struct dadosFunc
 {
   char nomeFunc[20];
   char endeFunc[30];
   char emailFunc[30];
-  char CPFF[20];
-  float salario;
+  char cpfFunc[20];
+  float salarioFunc;
 } Funcionario;
 
-FILE *fClientes;
-FILE *fFornecedores;
-FILE *fProdutos;
-FILE *fFuncionarios;
-FILE *fAuxCli;
-FILE *fAuxForn;
-FILE *fAuxProd;
-FILE *fAuxFunc;
-int opc;
-// incio do cliente
-void criarArquivoCliente()
+struct dadosProd
 {
-  if ((fClientes = fopen("clientes.dat", "a")) == NULL)
+  char nomeProd[30];
+  int codProd;
+  float valorProd;
+} Produto;
+
+FILE *fClientes;
+FILE *fAuxCli;
+
+FILE *fFornecedores;
+FILE *fAuxForn;
+
+FILE *fFuncionarios;
+FILE *fAuxFunc;
+
+FILE *fProdutos;
+FILE *fAuxProd;
+
+int opc;
+
+void criaArquivoCliente()
+{
+  if ((fClientes = fopen("Clientes.dat", "a")) == NULL)
   {
-    printf("\n Erro de criaþÒo do arquivo Clientes");
+    printf("\nErro de cria��o do arquivo Clientes");
     return;
   }
-  printf("\n Arquivo Clientes Criado");
   fclose(fClientes);
 }
 
-void cria_arqAuxCli()
+void criaArquivoAuxiliarCliente()
 {
-  if ((fAuxCli = fopen("auxcli.dat", "a")) == NULL)
+  if ((fAuxCli = fopen("AuxCli.dat", "a")) == NULL)
   {
-    system("cls");
-    printf("\n Erro de criaþÒo de arquivo AuxCli");
+    printf("\nErro de cria��o do arquivo AuxCli");
     return;
   }
-  printf("\n Arquivo AuxCli Criado");
   fclose(fAuxCli);
 }
 
+void criaArquivoFornecedor()
+{
+  if ((fFornecedores = fopen("Fornecedores.dat", "a")) == NULL)
+  {
+    printf("\nErro de cria��o do arquivo Fornecedores");
+    return;
+  }
+  fclose(fFornecedores);
+}
+
+void criaArquivoAuxiliarForn()
+{
+  if ((fAuxForn = fopen("AuxForn.dat", "a")) == NULL)
+  {
+    printf("\nErro de cria��o do arquivo AuxForn");
+    return;
+  }
+  fclose(fAuxForn);
+}
+
+void criaArquivoFuncionario()
+{
+  if ((fFuncionarios = fopen("Funcionarios.dat", "a")) == NULL)
+  {
+    printf("\nErro de cria��o do arquivo Funcion�rios");
+    return;
+  }
+  fclose(fFuncionarios);
+}
+
+void criaArquivoAuxiliarFuncionarios()
+{
+  if ((fAuxFunc = fopen("AuxFunc.dat", "a")) == NULL)
+  {
+    printf("\nErro de cria��o do arquivo AuxFunc");
+    return;
+  }
+  fclose(fAuxFunc);
+}
+
+void criaArquivoProduto()
+{
+  if ((fProdutos = fopen("Produtos.dat", "a")) == NULL)
+  {
+    printf("\nErro dee cria��o do arquivo Produtos");
+    return;
+  }
+  fclose(fProdutos);
+}
+
+void criaArquivoAuxiliarProdutos()
+{
+  if ((fAuxProd = fopen("AuxProd.dat", "a")) == NULL)
+  {
+    printf("\nErro de cria��o do arquivo AuxProd");
+    return;
+  }
+  fclose(fAuxProd);
+}
+
+// Inicio do cliente
 void cadastrarCliente()
 {
   char op;
   system("cls");
   int tamanho = 0;
-  fClientes = fopen("clientes.dat", "r+");
+  fClientes = fopen("Clientes.dat", "r+");
   rewind(fClientes);
   do
   {
     fread(&Cliente, sizeof(Cliente), 1, fClientes);
     tamanho++;
   } while (!feof(fClientes));
-
   fseek(fClientes, sizeof(Cliente), tamanho);
   do
   {
     system("cls");
-    cout << "\n Digite o nome do cliente:";
-    cin >> Cliente.nomeCli;
-    printf("\n Digite a idade:");
+    fflush(stdin);
+    cout << "\nDigite o nome do cliente: ";
+    gets(Cliente.nomeCli);
+    printf("\nDigite a idade do cliente: ");
     cin >> Cliente.idadeCli;
-    printf("\n Digite o salario base:");
-    cin >> Cliente.sbaseCli;
-    printf("\n Digite o valor da compra:");
+    printf("\nDigite o sal�rio do cliente: ");
+    cin >> Cliente.salarioCli;
+    printf("\nDigite o valor da compra: ");
     cin >> Cliente.vcomprasCli;
     tamanho = tamanho + fwrite(&Cliente, sizeof(struct dadosCli), 1, fClientes);
-
-    printf("\n Continuar cadastrando <S> ou <N>:");
+    printf("\n\nContinuar cadastrando <S> ou <N>: ");
     cin >> op;
     op = toupper(op);
   } while (op == 'S');
   fclose(fClientes);
-  MenuCli();
+  menuCliente();
 }
 
 void consultarCliente()
 {
   system("cls");
-  fClientes = fopen("clientes.dat", "r");
+  fClientes = fopen("Clientes.dat", "r");
   fseek(fClientes, sizeof(struct dadosCli), 0);
-
   while (fread(&Cliente, sizeof(Cliente), 1, fClientes) == 1)
   {
     system("cls");
-    printf("Nome Cliente  :        %s\n", Cliente.nomeCli);
-    printf("Idade Cliente :       %d\n", Cliente.idadeCli);
-    printf("Salario Ciente:     %.2f\n", Cliente.sbaseCli);
-    printf("Valor Compr Cliente: %.2f\n", Cliente.vcomprasCli);
-    printf("\n Digite enter para continuar\n");
+    printf("\nNome Cliente        : %s\n", Cliente.nomeCli);
+    printf("\nIdade Cliente       : %d\n", Cliente.idadeCli);
+    printf("\nSalario Cliente     : %.2f\n", Cliente.salarioCli);
+    printf("\nValor Compra Cliente: %.2f\n", Cliente.vcomprasCli);
     getch();
   }
-  printf("\n fim do arquivo");
-  fclose(fClientes);
-  MenuCli();
+  printf("\n\nFim do arquivo...");
   getch();
+  fclose(fClientes);
+  menuCliente();
 }
 
 void consultarNomeCliente()
@@ -146,20 +206,23 @@ void consultarNomeCliente()
   char op;
 
   system("cls");
-  fClientes = fopen("clientes.dat", "r+");
+  fClientes = fopen("Clientes.dat", "r+");
   fseek(fClientes, sizeof(struct dadosCli), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nom_pro;
+  fflush(stdin);
+  printf("\nDigite o nome para a procura: ");
+  gets(nom_pro);
   while (fread(&Cliente, sizeof(Cliente), 1, fClientes) == 1)
   {
     achou = strcmp(Cliente.nomeCli, nom_pro);
+
     if (achou == 0)
     {
-      printf("\n O Nome é.................:%s", Cliente.nomeCli);
-      printf("\n A Idade é................:%d", Cliente.idadeCli);
-      printf("\n O Salßrio Bruto é........:%0.2f", Cliente.sbaseCli);
-      printf("\n O Valor da Compra é......:%0.2f", Cliente.vcomprasCli);
+      printf("\n O Nome �.............: %s", Cliente.nomeCli);
+      printf("\n A Idade �............: %d", Cliente.idadeCli);
+      printf("\n O Sal�rio Bruto �....: %0.2f", Cliente.salarioCli);
+      printf("\n O Valor da Compra ,..: %0.2f", Cliente.vcomprasCli);
       printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar...");
       getch();
       localizou = 0;
     }
@@ -167,21 +230,18 @@ void consultarNomeCliente()
 
   if (localizou == 1)
   {
-    printf("\n Cliente nÒo Cadastrado\n");
-    printf("\n Cadastrar Cliente <S> ou <N>:");
+    printf("\nCliente n�o cadastrado\n");
+    printf("\nCadastrar cliente <S> ou <N>: ");
     cin >> op;
     op = toupper(op);
+
     if (op == 'S')
     {
       cadastrarCliente();
+      getch();
     }
-    else
-    {
-      fclose(fClientes);
-    }
-    getch();
   }
-  MenuCli();
+  menuCliente();
 }
 
 void alterarCliente()
@@ -189,131 +249,838 @@ void alterarCliente()
   char nom_pro[20];
   int achou;
   int pos = 0;
+
   system("cls");
-  fClientes = fopen("clientes.dat", "r+");
+  fClientes = fopen("Clientes.dat", "r+");
   fseek(fClientes, sizeof(struct dadosCli), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nom_pro;
+  fflush(stdin);
+  printf("\nDigite o nome para procura: ");
+  gets(nom_pro);
   while (fread(&Cliente, sizeof(Cliente), 1, fClientes) == 1)
   {
     achou = strcmp(Cliente.nomeCli, nom_pro);
+    pos++;
     if (achou == 0)
     {
-      printf("\n O Nome é.................:%s", Cliente.nomeCli);
-      printf("\n A Idade é................:%d", Cliente.idadeCli);
-      printf("\n O Salßrio Bruto é........:%0.2f", Cliente.sbaseCli);
-      printf("\n O Valor da Compra é......:%0.2f", Cliente.vcomprasCli);
-      printf("_____________________________________________\n");
-      printf("Digite <enter> para continuar e alterar____________\n");
+      printf("\n O Nome �.............: %s", Cliente.nomeCli);
+      printf("\n A Idade �............: %d", Cliente.idadeCli);
+      printf("\n O Sal�rio Bruto �....: %0.2f", Cliente.salarioCli);
+      printf("\n O Valor da Compra �..: %0.2f", Cliente.vcomprasCli);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
       getch();
 
-      printf("\n Digite a alterþÒo do nome do cliente: %s", Cliente.nomeCli);
-      cin >> Cliente.nomeCli;
-      printf("\n Digite a idade:");
+      fflush(stdin);
+      printf("\n\nDigite a altera��o do nome do cliente: ");
+      gets(Cliente.nomeCli);
+      printf("\nDigite a nova idade: ");
       cin >> Cliente.idadeCli;
-      printf("\n Digite o salario base:");
-      cin >> Cliente.sbaseCli;
-      printf("\n Digite o valor da compra:");
+      printf("\nDigite o novo sal�rio: ");
+      cin >> Cliente.salarioCli;
+      printf("\nDigite o novo valor da compra: ");
       cin >> Cliente.vcomprasCli;
       fseek(fClientes, pos * sizeof(struct dadosCli), SEEK_SET);
       fwrite(&Cliente, sizeof(struct dadosCli), 1, fClientes);
       fseek(fClientes, sizeof(struct dadosCli), SEEK_END);
     }
-    printf("Digite <enter> para continuar___________________\n");
-    getch();
+
+    printf("\nDigite <enter> para continuar...");
+    getche();
   }
+
   fclose(fClientes);
-  MenuCli();
+  menuCliente();
 }
 
-void excluirCliente()
+void excluirCLiente()
 {
   char nom_pro[20];
-  int achou = 1;
-  int tamanhoAuxiliar = 0;
-  int tamanhoCliente = 0;
+  int achou;
+  int tamanhoaux = 0;
+  int tamanhocli = 0;
 
   system("cls");
   fClientes = fopen("Clientes.dat", "r+");
   fseek(fClientes, sizeof(struct dadosCli), 0);
-  cria_arqAuxCli();
-  fAuxCli = fopen("auxcli.dat", "r+");
+  criaArquivoAuxiliarCliente();
+  fAuxCli = fopen("AuxCli.dat", "r+");
   fseek(fAuxCli, sizeof(struct dadosCli), 0);
-
-  printf("\n Digite o Nome do cliente p/ Procura : ");
+  fflush(stdin);
+  printf("\nDigite o nome do cliente para procura: ");
   cin >> nom_pro;
+
   while (fread(&Cliente, sizeof(Cliente), 1, fClientes) == 1)
   {
     achou = strcmp(Cliente.nomeCli, nom_pro);
+
     if (achou == 0)
     {
-      printf("\n O Nome é.................:%s", Cliente.nomeCli);
-      printf("\n A Idade é................:%d", Cliente.idadeCli);
-      printf("\n O Salßrio Bruto é........:%0.2f", Cliente.sbaseCli);
-      printf("\n O Valor da Compra é......:%0.2f", Cliente.vcomprasCli);
-      printf("_____________________________________________\n");
+      printf("\n O Nome �.............: %s", Cliente.nomeCli);
+      printf("\n A Idade �............: %d", Cliente.idadeCli);
+      printf("\n O Sal�rio Bruto �....: %0.2f", Cliente.salarioCli);
+      printf("\n O Valor da Compra �..: %0.2f", Cliente.vcomprasCli);
+      printf("\n_____________________________________________\n");
+      printf("\n Digite <enter> para continuar");
       getch();
     }
     else
     {
-      tamanhoAuxiliar = tamanhoAuxiliar + fwrite(&Cliente, sizeof(struct dadosCli), 1, fAuxCli);
+      tamanhoaux = tamanhoaux + fwrite(&Cliente, sizeof(struct dadosCli), 1, fAuxCli);
     }
   }
+
   fclose(fAuxCli);
   fclose(fClientes);
-  remove("clientes.dat");
-  criarArquivoCliente();
-  fClientes = fopen("clientes.dat", "r+");
+  remove("Clientes.dat");
+  criaArquivoCliente();
+  fClientes = fopen("Clientes.dat", "r+");
   fseek(fClientes, sizeof(struct dadosCli), 0);
-
-  fAuxCli = fopen("auxcli.dat", "r+");
+  fAuxCli = fopen("AuxCli.dat", "r+");
   fseek(fAuxCli, sizeof(struct dadosCli), 0);
   while (fread(&Cliente, sizeof(Cliente), 1, fAuxCli) == 1)
   {
-    tamanhoCliente = tamanhoCliente + fwrite(&Cliente, sizeof(struct dadosCli), 1, fClientes);
+    tamanhocli = tamanhocli + fwrite(&Cliente, sizeof(struct dadosCli), 1, fClientes);
   }
-
   fclose(fAuxCli);
-  remove("auxcli.dat");
+  remove("AuxCli.dat");
   fclose(fClientes);
-  printf("\n Cliente ExcluÝdo - Digite <enter> para continuar___________________\n");
-  getch();
-  MenuCli();
+  printf("\n\nCliente excl�ido - Digite <enter> para continuar...");
+  getche();
+  menuCliente();
 }
 
-void excluirArquivoCliente()
+void excluirAuxiliarCliente()
 {
   char op;
-  printf("\n Deleta Arquivo <S> ou <N>? ");
+  printf("\n\nDeletar Arquivo ? <S> ou <N>: ");
   cin >> op;
   op = toupper(op);
   if (op == 'S')
   {
-    remove("clientes.dat");
-    printf("arquivo deletado");
+    remove("Clientes.dat");
+    printf("\nArquivo deletado. - Digite <enter> para continuar...");
+    getche();
   }
-
   else
   {
-    printf("\n Arquivo nao foi deletado por sua opcao");
-    getch();
+    printf("\n\nArquivo n�o foi deletado por sua op��o.");
   }
-  criarArquivoCliente();
+  criaArquivoCliente();
+  menuCliente();
 }
-void MenuCli()
+// final dos clientes
+
+// Inicio dos fornecedores
+void cadastrarFornecedor()
+{
+  char op;
+  system("cls");
+  int tamanho = 0;
+  fFornecedores = fopen("Fornecedores.dat", "r+");
+  rewind(fFornecedores);
+  do
+  {
+    fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores);
+    tamanho++;
+  } while (!feof(fFornecedores));
+  fseek(fFornecedores, sizeof(Fornecedor), tamanho);
+  do
+  {
+    system("cls");
+    fflush(stdin);
+    cout << "\nDigite o nome do fornecedor: ";
+    gets(Fornecedor.nomeForn);
+    fflush(stdin);
+    printf("\nDigite o endere�o do fornecedor: ");
+    gets(Fornecedor.endeForn);
+    fflush(stdin);
+    printf("\nDigite o email do fornecedor: ");
+    gets(Fornecedor.emailForn);
+    fflush(stdin);
+    printf("\nDigite o CNPJ do fornecedor: ");
+    gets(Fornecedor.cnpj);
+    tamanho = tamanho + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
+    printf("\n\nContinuar cadastrando <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+  } while (op == 'S');
+
+  fclose(fFornecedores);
+  menuFornenecedor();
+}
+
+void consultarFornecedor()
 {
   system("cls");
-  criarArquivoCliente();
-  printf("Menu de opcoes");
-  printf("\n");
-  printf("1 - Cadastrar Clientes\n");
-  printf("2 - Consultar Listar todos Clintes  \n");
-  printf("3 - Consultar Por Nome de Cliente \n");
-  printf("4 - Alterar Registro de Cliente \n");
-  printf("5 - Excluir Registro de Clientes \n");
-  printf("6 - Exclui Arquivo total de Clientes\n");
-  printf("7 - Voltar ao Menu principal \n");
-  printf("Digite uma opcao \n");
+  fFornecedores = fopen("Fornecedores.dat", "r");
+  fseek(fFornecedores, sizeof(struct dadosForn), 0);
+  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
+  {
+    system("cls");
+    printf("\nNome Fornecedor     : %s\n", Fornecedor.nomeForn);
+    printf("\nEndere�o Fornecedor : %s\n", Fornecedor.endeForn);
+    printf("\nEmail Fornecedor    : %s\n", Fornecedor.emailForn);
+    printf("\nCNPJ Fornecedor     : %s\n", Fornecedor.cnpj);
+    printf("\nDigite <enter> para continuar");
+    getch();
+  }
+  printf("\n\nFim do arquivo...");
+  getch();
+  fclose(fFornecedores);
+  menuFornenecedor();
+}
+
+void consultarNomeFornecedor()
+{
+  char nom_pro[20];
+  int achou = 1;
+  int localizou = 1;
+  char op;
+  system("cls");
+  fFornecedores = fopen("Fornecedores.dat", "r+");
+  fseek(fFornecedores, sizeof(struct dadosForn), 0);
+  fflush(stdin);
+  printf("\nDigite o nome para a procura: ");
+  gets(nom_pro);
+
+  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
+  {
+    achou = strcmp(Fornecedor.nomeForn, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Fornecedor.nomeForn);
+      printf("\n O Endere�o �.........: %s", Fornecedor.endeForn);
+      printf("\n O Email �............: %s", Fornecedor.emailForn);
+      printf("\n O CNPJ �.............: %s", Fornecedor.cnpj);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      localizou = 0;
+    }
+  }
+
+  if (localizou == 1)
+  {
+    printf("\nFornecedor n�o cadastrado\n");
+    printf("\nCadastrar fornecedor <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+    if (op == 'S')
+    {
+      cadastrarFornecedor();
+      getch();
+    }
+  }
+  menuFornenecedor();
+}
+void alteraForn()
+{
+  char nom_pro[20];
+  int achou;
+  int pos = 0;
+
+  system("cls");
+  fFornecedores = fopen("Fornecedores.dat", "r+");
+  fseek(fFornecedores, sizeof(struct dadosForn), 0);
+
+  fflush(stdin);
+  printf("\nDigite o nome para procura: ");
+  gets(nom_pro);
+
+  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
+  {
+    achou = strcmp(Fornecedor.nomeForn, nom_pro);
+    pos++;
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Fornecedor.nomeForn);
+      printf("\n O Endere�o �.........: %s", Fornecedor.endeForn);
+      printf("\n O Email �............: %s", Fornecedor.emailForn);
+      printf("\n O CNPJ �.............: %s", Fornecedor.cnpj);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      fflush(stdin);
+      printf("\n\nDigite a altera��o do nome do fornecedor: ");
+      gets(Fornecedor.nomeForn);
+      fflush(stdin);
+      printf("\nDigite o novo endere�o: ");
+      gets(Fornecedor.endeForn);
+      printf("\nDigite o novo email: ");
+      cin >> Fornecedor.emailForn;
+      fflush(stdin);
+      printf("\nDigite o novo CNPJ: ");
+      gets(Fornecedor.cnpj);
+      fseek(fFornecedores, pos * sizeof(struct dadosForn), SEEK_SET);
+      fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
+      fseek(fFornecedores, sizeof(struct dadosForn), SEEK_END);
+    }
+    printf("\nDigite <enter> para continuar...");
+    getche();
+  }
+
+  fclose(fFornecedores);
+  menuFornenecedor();
+}
+
+void excluirFornecedor()
+{
+  char nom_pro[20];
+  int achou;
+  int tamanhoaux = 0;
+  int tamanhoforn = 0;
+
+  system("cls");
+  fFornecedores = fopen("Fornecedores.dat", "r+");
+  fseek(fFornecedores, sizeof(struct dadosForn), 0);
+  criaArquivoAuxiliarForn();
+  fAuxForn = fopen("AuxForn.dat", "r+");
+  fseek(fAuxForn, sizeof(struct dadosForn), 0);
+  fflush(stdin);
+  printf("\nDigite o nome do fornecedor para procura: ");
+  gets(nom_pro);
+  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
+  {
+    achou = strcmp(Fornecedor.nomeForn, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Fornecedor.nomeForn);
+      printf("\n O Endere�o �.........: %s", Fornecedor.endeForn);
+      printf("\n O Email �............: %s", Fornecedor.emailForn);
+      printf("\n O CNPJ �.............: %s", Fornecedor.cnpj);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+    }
+    else
+    {
+      tamanhoaux = tamanhoaux + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fAuxForn);
+    }
+  }
+
+  fclose(fAuxForn);
+  fclose(fFornecedores);
+  remove("Fornecedores.dat");
+  criaArquivoFornecedor();
+  fFornecedores = fopen("Fornecedores.dat", "r+");
+  fseek(fFornecedores, sizeof(struct dadosForn), 0);
+  fAuxForn = fopen("AuxForn.dat", "r+");
+  fseek(fAuxForn, sizeof(struct dadosForn), 0);
+  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fAuxForn) == 1)
+  {
+    tamanhoforn = tamanhoforn + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
+  }
+  fclose(fAuxForn);
+  remove("AuxForn.dat");
+  fclose(fFornecedores);
+  printf("\n\nFornecedor excl�ido - Digite <enter> para continuar...");
+  getche();
+  menuFornenecedor();
+}
+
+void excluirArquivoFornecedor()
+{
+  char op;
+  printf("\n\nDeletar o Arquivo <S> ou <N>: ");
+  cin >> op;
+  op = toupper(op);
+  if (op == 'S')
+  {
+    remove("Fornecedores.dat");
+    printf("\nArquivo deletado.");
+  }
+  else
+  {
+    printf("\n\nArquivo n�o foi deletado por sua op��o.");
+  }
+  criaArquivoFornecedor();
+  getche();
+  menuFornenecedor();
+}
+// fim fornecedor
+
+// Inicio Funcionarios
+void cadastrarFuncionario()
+{
+  char op;
+  system("cls");
+  int tamanho = 0;
+  fFuncionarios = fopen("Funcionarios.dat", "r+");
+  rewind(fFuncionarios);
+  do
+  {
+    fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios);
+    tamanho++;
+  } while (!feof(fFuncionarios));
+  fseek(fFuncionarios, sizeof(Funcionario), tamanho);
+  do
+  {
+    system("cls");
+    fflush(stdin);
+    cout << "\nDigite o nome do funcion�rio: ";
+    gets(Funcionario.nomeFunc);
+    fflush(stdin);
+    printf("\nDigite o endere�o do funcion�rio: ");
+    gets(Funcionario.endeFunc);
+    fflush(stdin);
+    printf("\nDigite o email do funcion�rio: ");
+    gets(Funcionario.emailFunc);
+    fflush(stdin);
+    printf("\nDigite o CPF do funcion�rio: ");
+    gets(Funcionario.cpfFunc);
+    printf("\nDigite o sal�rio do funcion�rio: ");
+    cin >> Funcionario.salarioFunc;
+    tamanho = tamanho + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
+    printf("\n\nContinuar cadastrando <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+  } while (op == 'S');
+  fclose(fFuncionarios);
+  menuFuncionario();
+}
+
+void consultarFuncionario()
+{
+  system("cls");
+  fFuncionarios = fopen("Funcionarios.dat", "r");
+  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
+  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
+  {
+    system("cls");
+    printf("\nNome Funcion�rio     : %s\n", Funcionario.nomeFunc);
+    printf("\nEndere�o Funcion�rio : %s\n", Funcionario.endeFunc);
+    printf("\nEmail Funcion�rio    : %s\n", Funcionario.emailFunc);
+    printf("\nCPF Funcion�rio      : %s\n", Funcionario.cpfFunc);
+    printf("\nSal�rio Funcion�rio  : %.2f\n", Funcionario.salarioFunc);
+    printf("\nDigite <enter> para continuar");
+    getch();
+  }
+  printf("\n\nFim do arquivo...");
+  getch();
+  fclose(fFuncionarios);
+  menuFuncionario();
+}
+
+void consultarNomeFuncionario()
+{
+  char nom_pro[20];
+  int achou = 1;
+  int localizou = 1;
+  char op;
+  system("cls");
+  fFuncionarios = fopen("Funcionarios.dat", "r+");
+  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
+  fflush(stdin);
+  printf("\nDigite o nome para a procura: ");
+  gets(nom_pro);
+  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
+  {
+    achou = strcmp(Funcionario.nomeFunc, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Funcionario.nomeFunc);
+      printf("\n O Endere�o �.........: %s", Funcionario.endeFunc);
+      printf("\n O Email �............: %s", Funcionario.emailFunc);
+      printf("\n O CPF �..............: %s", Funcionario.cpfFunc);
+      printf("\n O Sal�rio ,...........: %.2f", Funcionario.salarioFunc);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      localizou = 0;
+    }
+  }
+  if (localizou == 1)
+  {
+    printf("\nFuncion�rio n�o cadastrado\n");
+    printf("\nCadastrar funcion�rio <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+    if (op == 'S')
+    {
+      cadastrarFuncionario();
+      getch();
+    }
+  }
+  menuFuncionario();
+}
+
+void alterarFuncionario()
+{
+  char nom_pro[20];
+  int achou;
+  int pos = 0;
+  system("cls");
+  fFuncionarios = fopen("Funcionarios.dat", "r+");
+  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
+  fflush(stdin);
+  printf("\nDigite o nome para procura: ");
+  gets(nom_pro);
+  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
+  {
+    achou = strcmp(Funcionario.nomeFunc, nom_pro);
+    pos++;
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Funcionario.nomeFunc);
+      printf("\n O Endere�o �.........: %s", Funcionario.endeFunc);
+      printf("\n O Email �............: %s", Funcionario.emailFunc);
+      printf("\n O CPF �..............: %s", Funcionario.cpfFunc);
+      printf("\n O Sal�rio ,...........: %.2f", Funcionario.salarioFunc);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      fflush(stdin);
+      printf("\n\nDigite a altera��o do nome do funcion�rio: ");
+      gets(Funcionario.nomeFunc);
+      fflush(stdin);
+      printf("\nDigite o novo endere�o: ");
+      gets(Funcionario.endeFunc);
+      printf("\nDigite o novo email: ");
+      cin >> Funcionario.emailFunc;
+      fflush(stdin);
+      printf("\nDigite o novo CPF: ");
+      gets(Funcionario.cpfFunc);
+      printf("\nDigite o novo sal�rio: ");
+      cin >> (Funcionario.salarioFunc);
+      fseek(fFuncionarios, pos * sizeof(struct dadosFunc), SEEK_SET);
+      fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
+      fseek(fFuncionarios, sizeof(struct dadosFunc), SEEK_END);
+    }
+    printf("\nDigite <enter> para continuar...");
+    getche();
+  }
+
+  fclose(fFuncionarios);
+  menuFuncionario();
+}
+void exlcuirFuncionario()
+{
+  char nom_pro[20];
+  int achou;
+  int tamanhoaux = 0;
+  int tamanhofunc = 0;
+
+  system("cls");
+  fFuncionarios = fopen("Funcionarios.dat", "r+");
+  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
+  criaArquivoAuxiliarFuncionarios();
+  fAuxFunc = fopen("AuxFunc.dat", "r+");
+  fseek(fAuxFunc, sizeof(struct dadosFunc), 0);
+  fflush(stdin);
+  printf("\nDigite o nome do funcion�rio para procura: ");
+  gets(nom_pro);
+  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
+  {
+    achou = strcmp(Funcionario.nomeFunc, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Nome �.............: %s", Funcionario.nomeFunc);
+      printf("\n O Endere�o �.........: %s", Funcionario.endeFunc);
+      printf("\n O Email �............: %s", Funcionario.emailFunc);
+      printf("\n O CPF �..............: %s", Funcionario.cpfFunc);
+      printf("\n O Sal�rio ,..........: %.2f", Funcionario.salarioFunc);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+    }
+    else
+    {
+      tamanhoaux = tamanhoaux + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fAuxFunc);
+    }
+  }
+  fclose(fAuxFunc);
+  fclose(fFuncionarios);
+  remove("Funcionarios.dat");
+  criaArquivoFuncionario();
+  fFuncionarios = fopen("Funcionarios.dat", "r+");
+  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
+  fAuxFunc = fopen("AuxFunc.dat", "r+");
+  fseek(fAuxFunc, sizeof(struct dadosFunc), 0);
+  while (fread(&Funcionario, sizeof(Funcionario), 1, fAuxFunc) == 1)
+  {
+    tamanhofunc = tamanhofunc + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
+  }
+  fclose(fAuxFunc);
+  remove("AuxFunc.dat");
+  fclose(fFuncionarios);
+  printf("\n\nFuncion�rio excl�ido - Digite <enter> para continuar...");
+  getche();
+  menuFuncionario();
+}
+
+void excluirArquivoFuncionario()
+{
+  char op;
+  printf("\n\nDeletar o Arquivo <S> ou <N>: ");
+  cin >> op;
+  op = toupper(op);
+  if (op == 'S')
+  {
+    remove("Funcionarios.dat");
+    printf("\nArquivo deletado.");
+  }
+  else
+  {
+    printf("\n\nArquivo n�o foi deletado por sua op��o.");
+  }
+  criaArquivoFuncionario();
+  getche();
+  menuFuncionario();
+}
+// fim funcionarios
+
+// inicio produtos
+void cadastrarProduto()
+{
+  char op;
+  system("cls");
+  int tamanho = 0;
+  fClientes = fopen("Produtos.dat", "r+");
+  rewind(fProdutos);
+  do
+  {
+    fread(&Produto, sizeof(Produto), 1, fProdutos);
+    tamanho++;
+  } while (!feof(fProdutos));
+  fseek(fProdutos, sizeof(Produto), tamanho);
+  do
+  {
+    system("cls");
+    fflush(stdin);
+    cout << "\nDigite o nome do produto: ";
+    gets(Produto.nomeProd);
+    printf("\nDigite o c�digo do produto: ");
+    cin >> Produto.codProd;
+    printf("\nDigite o valor do produto: ");
+    cin >> Produto.valorProd;
+    tamanho = tamanho + fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
+
+    printf("\n\nContinuar cadastrando <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+  } while (op == 'S');
+
+  fclose(fProdutos);
+  menuProdutos();
+}
+
+void consultarProduto()
+{
+  system("cls");
+  fProdutos = fopen("Produtos.dat", "r");
+  fseek(fProdutos, sizeof(struct dadosProd), 0);
+  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
+  {
+    system("cls");
+    printf("\nNome Produto   : %s\n", Produto.nomeProd);
+    printf("\nC�digo Produto : %d\n", Produto.codProd);
+    printf("\nValor Produto  : %.2f\n", Produto.valorProd);
+    printf("\nDigite <enter> para continuar");
+    getch();
+  }
+  printf("\n\nFim do arquivo...");
+  getche();
+  fclose(fProdutos);
+  menuProdutos();
+}
+void consulta_nomeProd()
+{
+  char nom_pro[20];
+  int achou = 1;
+  int localizou = 1;
+  char op;
+  system("cls");
+  fProdutos = fopen("Produtos.dat", "r+");
+  fseek(fProdutos, sizeof(struct dadosProd), 0);
+  fflush(stdin);
+  printf("\nDigite o nome do produto para a procura: ");
+  gets(nom_pro);
+  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
+  {
+    achou = strcmp(Produto.nomeProd, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Produto �.............: %s", Produto.nomeProd);
+      printf("\n O C�digo do Produto �...: %d", Produto.codProd);
+      printf("\n O Valor do Produto �....: %.2f", Produto.valorProd);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      localizou = 0;
+    }
+  }
+
+  if (localizou == 1)
+  {
+    printf("\nProduto n�o cadastrado\n");
+    printf("\nCadastrar produto <S> ou <N>: ");
+    cin >> op;
+    op = toupper(op);
+    if (op == 'S')
+    {
+      cadastrarProduto();
+      getch();
+    }
+  }
+  menuProdutos();
+}
+
+void alterarProduto()
+{
+  char nom_pro[20];
+  int achou;
+  int pos = 0;
+  system("cls");
+  fProdutos = fopen("Produtos.dat", "r+");
+  fseek(fProdutos, sizeof(struct dadosProd), 0);
+  fflush(stdin);
+  printf("\nDigite o nome do produto para procura: ");
+  gets(nom_pro);
+  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
+  {
+    achou = strcmp(Produto.nomeProd, nom_pro);
+    pos++;
+    if (achou == 0)
+    {
+      printf("\n O Produto �.............: %s", Produto.nomeProd);
+      printf("\n O C�digo do Produto �...: %d", Produto.codProd);
+      printf("\n O Valor do Produto �....: %.2f", Produto.valorProd);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+      fflush(stdin);
+      printf("\n\nDigite a altera��o do nome do produto: ");
+      gets(Produto.nomeProd);
+      printf("\nDigite o novo c�digo do produto: ");
+      cin >> Produto.codProd;
+      printf("\nDigite o novo valor do produto: ");
+      cin >> Produto.valorProd;
+      fseek(fProdutos, pos * sizeof(struct dadosProd), SEEK_SET);
+      fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
+      fseek(fProdutos, sizeof(struct dadosProd), SEEK_END);
+    }
+    printf("\nDigite <enter> para continuar...");
+    getche();
+  }
+
+  fclose(fProdutos);
+  menuProdutos();
+}
+
+void excluirProduto()
+{
+  char nom_pro[20];
+  int achou;
+  int tamanhoaux = 0;
+  int tamanhoprod = 0;
+  system("cls");
+  fProdutos = fopen("Produtos.dat", "r+");
+  fseek(fProdutos, sizeof(struct dadosProd), 0);
+  criaArquivoAuxiliarProdutos();
+  fAuxProd = fopen("AuxProd.dat", "r+");
+  fseek(fAuxProd, sizeof(struct dadosProd), 0);
+  fflush(stdin);
+  printf("\nDigite o nome do produto para procura: ");
+  gets(nom_pro);
+  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
+  {
+    achou = strcmp(Produto.nomeProd, nom_pro);
+    if (achou == 0)
+    {
+      printf("\n O Produto �.............: %s", Produto.nomeProd);
+      printf("\n O C�digo do Produto �...: %d", Produto.codProd);
+      printf("\n O Valor do Produto �....: %.2f", Produto.valorProd);
+      printf("\n_____________________________________________\n");
+      printf("\nDigite <enter> para continuar");
+      getch();
+    }
+    else
+    {
+      tamanhoaux = tamanhoaux + fwrite(&Produto, sizeof(struct dadosProd), 1, fAuxProd);
+    }
+  }
+  fclose(fAuxProd);
+  fclose(fProdutos);
+  remove("Produtos.dat");
+  criaArquivoProduto();
+  fProdutos = fopen("Produtos.dat", "r+");
+  fseek(fProdutos, sizeof(struct dadosProd), 0);
+  fAuxProd = fopen("AuxProd.dat", "r+");
+  fseek(fAuxProd, sizeof(struct dadosProd), 0);
+  while (fread(&Produto, sizeof(Produto), 1, fAuxProd) == 1)
+  {
+    tamanhoprod = tamanhoprod + fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
+  }
+  fclose(fAuxProd);
+  remove("AuxProd.dat");
+  fclose(fProdutos);
+  printf("\n\nProduto excl�ido - Digite <enter> para continuar...");
+  getche();
+  menuProdutos();
+}
+void exlcuirArquivoProduto()
+{
+  char op;
+  printf("\n\nDeletar Arquivo <S> ou <N>: ");
+  cin >> op;
+  op = toupper(op);
+
+  if (op == 'S')
+  {
+    remove("Produtos.dat");
+    printf("\nArquivo deletado.");
+  }
+  else
+  {
+    printf("\n\nArquivo n�o foi deletado por sua op��o.");
+  }
+  criaArquivoProduto();
+  getche();
+  menuProdutos();
+}
+// Menu Principal
+void menuPrincipal()
+{
+  system("cls");
+  printf("\nMenu Principal: \n");
+  printf("\n1 - Clientes");
+  printf("\n2 - Fornecedores");
+  printf("\n3 - Funcion�rios");
+  printf("\n4 - Produtos");
+  printf("\n5 - Sair do sistema\n");
+  printf("\nDigite uma op��o: ");
+  cin >> opc;
+  switch (opc)
+  {
+  case 1:
+    menuCliente();
+    break;
+  case 2:
+    menuFornenecedor();
+    break;
+  case 3:
+    menuFuncionario();
+    break;
+  case 4:
+    menuProdutos();
+    break;
+  case 5:
+    exit(0);
+  }
+}
+
+void menuCliente()
+{
+  system("cls");
+  printf("\nMenu Cliente: \n");
+  printf("\n1 - Cadastrar Cliente");
+  printf("\n2 - Consultar todos os Clientes");
+  printf("\n3 - Consultar Cliente Por Nome");
+  printf("\n4 - Alterar um Registro de um Cliente");
+  printf("\n5 - Excluir um Registro de um Cliente");
+  printf("\n6 - Excluir todo o Arquivo Clientes");
+  printf("\n7 - Voltar ao Menu Principal\n");
+  printf("\nDigite uma op��o: ");
   cin >> opc;
   switch (opc)
   {
@@ -330,277 +1097,28 @@ void MenuCli()
     alterarCliente();
     break;
   case 5:
-    excluirCliente();
+    excluirCLiente();
     break;
   case 6:
-    excluirArquivoCliente();
+    excluirAuxiliarCliente();
     break;
   case 7:
     menuPrincipal();
+    break;
   }
 }
-// fim do cliente
-//  inicio do fornecedor
-
-void cria_arqForn()
-{
-  if ((fFornecedores = fopen("fornecedores.dat", "a")) == NULL)
-  {
-    printf("\n Erro de criacao do arquivo Fornecedores");
-    return;
-  }
-  printf("\n Arquivo fornecedores Criado");
-  fclose(fFornecedores);
-}
-
-void cria_arqAuxForn()
-{
-  if ((fAuxForn = fopen("auxforn.dat", "a")) == NULL)
-  {
-    system("cls");
-    printf("\n Erro de criacao de arquivo AuxForn");
-    return;
-  }
-  printf("\n Arquivo AuxForn Criado");
-  fclose(fAuxForn);
-}
-
-void cadastrarFornecedor()
-{
-  char op;
-  system("cls");
-  int tamanho = 0;
-  fFornecedores = fopen("fornecedores.dat", "r+");
-  rewind(fFornecedores);
-  do
-  {
-    fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores);
-    tamanho++;
-  } while (!feof(fFornecedores));
-
-  fseek(fFornecedores, sizeof(Fornecedor), tamanho);
-  do
-  {
-    system("cls");
-    cout << "\n Digite o nome do fornecedor:";
-    cin >> Fornecedor.nomeForn;
-    printf("\n Digite o endereco do fornecedor:");
-    cin >> Fornecedor.endeForn;
-    printf("\n Digite o email do fornecedor:");
-    cin >> Fornecedor.emailForn;
-    printf("\n Digite o CNPJ do fornecedor:");
-    cin >> Fornecedor.cnpj;
-
-    tamanho = tamanho + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
-
-    printf("\n Continuar cadastrando <S> ou <N>:");
-    cin >> op;
-    op = toupper(op);
-  } while (op == 'S');
-  fclose(fFornecedores);
-  MenuForn();
-}
-
-void consultarFornecedor()
-{
-
-  system("cls");
-  fFornecedores = fopen("fornecedores.dat", "r");
-  fseek(fFornecedores, sizeof(struct dadosForn), 0);
-
-  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
-  {
-    system("cls");
-    printf("Nome Fornecedor:         %s\n", Fornecedor.nomeForn);
-    printf("endereco do Fornecedor:  %s\n", Fornecedor.endeForn);
-    printf("Email do Fornecedor:     %s\n", Fornecedor.emailForn);
-    printf("CNPJ do Fornecedor:      %s\n", Fornecedor.cnpj);
-    printf("\n Digite enter para continuar\n");
-    getch();
-  }
-  printf("\n fim do arquivo");
-  fclose(fFornecedores);
-  getch();
-  MenuForn();
-}
-void consultarNomeFornecedor()
-{
-  char nom_pro[20];
-  int achou = 1;
-  int localizou = 1;
-  char op;
-
-  system("cls");
-  fFornecedores = fopen("fornecedores.dat", "r+");
-  fseek(fFornecedores, sizeof(struct dadosForn), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nom_pro;
-  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
-  {
-    achou = strcmp(Fornecedor.nomeForn, nom_pro);
-    if (achou == 0)
-    {
-      printf("\n O Nome é:%s ", Fornecedor.nomeForn);
-      printf("\n O email e:%s ", Fornecedor.emailForn);
-      printf("\n O Endereco do fornecedor e:%s ", Fornecedor.endeForn);
-      printf("\n O CNPJ do fornecedor e:%s ", Fornecedor.cnpj);
-      printf("\n_____________________________________________\n");
-      getch();
-      localizou = 0;
-    }
-  }
-
-  if (localizou == 1)
-  {
-    printf("\n Fornecedor nÒo Cadastrado\n");
-    printf("\n Cadastrar Fornecedor? <S> ou <N>:");
-    cin >> op;
-    op = toupper(op);
-    if (op == 'S')
-    {
-      cadastrarFornecedor();
-    }
-    else
-    {
-      fclose(fFornecedores);
-    }
-    getch();
-    MenuForn();
-  }
-}
-void alterarFornecedor()
-{
-  char nom_pro[20];
-  int achou;
-  int pos = 0;
-  system("cls");
-  fFornecedores = fopen("fornecedores.dat", "r+");
-  fseek(fFornecedores, sizeof(struct dadosForn), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nom_pro;
-  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
-  {
-    achou = strcmp(Fornecedor.nomeForn, nom_pro);
-    pos++;
-    if (achou == 0)
-    {
-      printf("\n O Nome é:%s ", Fornecedor.nomeForn);
-      printf("\n O email e:%s ", Fornecedor.emailForn);
-      printf("\n O Endereco do fornecedor e:%s ", Fornecedor.endeForn);
-      printf("\n O CNPJ do fornecedor e:%s ", Fornecedor.cnpj);
-      printf("\n_____________________________________________\n");
-      printf("Digite <enter> para continuar e alterar____________\n");
-      getch();
-      printf("\n Digite a alterþÒo do nome do cliente: %s", Fornecedor.nomeForn);
-      cin >> Fornecedor.nomeForn;
-      printf("\n Digite o Email:");
-      cin >> Fornecedor.emailForn;
-      printf("\n Digite o endereco:");
-      cin >> Fornecedor.endeForn;
-      printf("\n Digite o CNPJ do fornecedor");
-      cin >> Fornecedor.cnpj;
-      fseek(fFornecedores, pos * sizeof(struct dadosForn), SEEK_SET);
-      fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
-      fseek(fFornecedores, sizeof(struct dadosForn), SEEK_END);
-    }
-    printf("Digite <enter> para continuar___________________\n");
-    getch();
-  }
-  fclose(fFornecedores);
-  MenuForn();
-}
-
-void excluirFornecedor()
-{
-  char nom_pro[20];
-  int achou = 1;
-  int tamanhoAuxiliar = 0;
-  int tamanhoForn = 0;
-
-  system("cls");
-  fFornecedores = fopen("fornecedores.dat", "r+");
-  fseek(fFornecedores, sizeof(struct dadosForn), 0);
-  cria_arqAuxForn();
-  fAuxForn = fopen("auxforn.dat", "r+");
-  fseek(fAuxForn, sizeof(struct dadosForn), 0);
-
-  printf("\n Digite o Nome do Fornecedor p/ Procura : ");
-  cin >> nom_pro;
-  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fFornecedores) == 1)
-  {
-    achou = strcmp(Fornecedor.nomeForn, nom_pro);
-
-    if (achou == 0)
-    {
-      printf("\n O Nome é:%s ", Fornecedor.nomeForn);
-      printf("\n O email e:%s ", Fornecedor.emailForn);
-      printf("\n O Endereco do fornecedor e:%s ", Fornecedor.endeForn);
-      printf("\n O CNPJ do fornecedor e:%s ", Fornecedor.cnpj);
-      printf("\n_____________________________________________\n");
-      getch();
-    }
-    else
-    {
-
-      tamanhoAuxiliar = tamanhoAuxiliar + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fAuxForn);
-    }
-  }
-
-  fclose(fAuxForn);
-  fclose(fFornecedores);
-  remove("fornecedores.dat");
-  cria_arqForn();
-  fFornecedores = fopen("fornecedores.dat", "r+");
-  fseek(fFornecedores, sizeof(struct dadosForn), 0);
-
-  fAuxForn = fopen("auxforn.dat", "r+");
-  fseek(fAuxForn, sizeof(struct dadosForn), 0);
-  while (fread(&Fornecedor, sizeof(Fornecedor), 1, fAuxForn) == 1)
-  {
-    tamanhoForn = tamanhoForn + fwrite(&Fornecedor, sizeof(struct dadosForn), 1, fFornecedores);
-  }
-
-  fclose(fAuxForn);
-  remove("auxforn.dat");
-  fclose(fFornecedores);
-  printf("\n Fornecedor ExcluÝdo - Digite <enter> para continuar___________________\n");
-  getch();
-  MenuForn();
-}
-
-void excluirArquivoFornecedor()
-{
-  char op;
-  printf("\n Deleta Arquivo <S> ou <N>? ");
-  cin >> op;
-  op = toupper(op);
-  if (op == 'S')
-  {
-    remove("fornecedores.dat");
-    printf("arquivo deletado");
-  }
-
-  else
-  {
-    printf("\n Arquivo nÒo foi deletado por sua opþÒo");
-    getch();
-  }
-  cria_arqForn();
-}
-void MenuForn()
+void menuFornenecedor()
 {
   system("cls");
-  cria_arqForn();
-  printf("Menu de opcoes");
-  printf("\n");
-  printf("1 - Cadastrar Fornecedores\n");
-  printf("2 - Consultar Listar todos Fornecedores  \n");
-  printf("3 - Consultar Por Nome de Fornecedores \n");
-  printf("4 - Alterar Registro de Fornecedores \n");
-  printf("5 - Excluir Registro de Fornecedores \n");
-  printf("6 - Exclui Arquivo total de Fornecedores\n");
-  printf("7 - Voltar ao Menu principal \n");
-  printf("Digite uma opcao \n");
+  printf("\nMenu Fornecedor: \n");
+  printf("\n1 - Cadastrar Fornecedor");
+  printf("\n2 - Consultar todos os Fornecedores");
+  printf("\n3 - Consultar Fornecedor Por Nome");
+  printf("\n4 - Alterar um Registro de um Fornecedor");
+  printf("\n5 - Excluir um Registro de um Fornecedor");
+  printf("\n6 - Excluir todo o Arquivo Fornecedores");
+  printf("\n7 - Voltar ao Menu Principal\n");
+  printf("\nDigite uma op��o: ");
   cin >> opc;
   switch (opc)
   {
@@ -614,7 +1132,7 @@ void MenuForn()
     consultarNomeFornecedor();
     break;
   case 4:
-    alterarFornecedor();
+    alteraForn();
     break;
   case 5:
     excluirFornecedor();
@@ -624,535 +1142,22 @@ void MenuForn()
     break;
   case 7:
     menuPrincipal();
-  }
-}
-// Fim fornecedor
-// inicio do produto
-void cria_arqProd()
-{
-  if ((fProdutos = fopen("produto.dat", "a")) == NULL)
-  {
-    printf("\n Erro de criaþÒo do arquivo Produto");
-    return;
-  }
-  printf("\n Arquivo Produto Criado");
-  fclose(fProdutos);
-}
-
-void cria_arqAuxProd()
-{
-  if ((fAuxProd = fopen("auxProd.dat", "a")) == NULL)
-  {
-    system("cls");
-    printf("\n Erro de criaþÒo de arquivo AuxProd");
-    return;
-  }
-  printf("\n Arquivo AuxProd Criado");
-  fclose(fAuxProd);
-}
-
-void cadastrarProduto()
-{
-  char op;
-  system("cls");
-  int tamanho = 0;
-  fProdutos = fopen("produto.dat", "r+");
-  rewind(fProdutos);
-  do
-  {
-    fread(&Produto, sizeof(Produto), 1, fProdutos);
-    tamanho++;
-  } while (!feof(fProdutos));
-
-  fseek(fProdutos, sizeof(Produto), tamanho);
-  do
-  {
-    system("cls");
-
-    cout << "\n Digite o nome do Produto:";
-    cin >> Produto.nomeprod;
-    printf("\n Digite o codigo do Produto:");
-    cin >> Produto.codprod;
-    printf("\n Digite o valor unitario do produto base:");
-    cin >> Produto.valorUniprod;
-    tamanho = tamanho + fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
-
-    printf("\n Continuar cadastrando <S> ou <N>:");
-    cin >> op;
-    op = toupper(op);
-  } while (op == 'S');
-  fclose(fProdutos);
-}
-
-void consultarProdutos()
-{
-  system("cls");
-  fProdutos = fopen("produto.dat", "r");
-  fseek(fProdutos, sizeof(struct dadosProd), 0);
-
-  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
-  {
-    system("cls");
-    printf("Nome Produto :        %s\n", Produto.nomeprod);
-    printf("Codigo do Produto :       %d\n", Produto.codprod);
-    printf("Valor unitario do produto:     %.2f\n", Produto.valorUniprod);
-    printf("\n Digite enter para continuar\n");
-    getch();
-  }
-  printf("\n fim do arquivo");
-  fclose(fProdutos);
-  getch();
-}
-
-void consultarNomeProduto()
-{
-
-  char nomeprod[30];
-  int achou = 1;
-  int localizou = 1;
-  char op;
-
-  system("cls");
-  fProdutos = fopen("produto.dat", "r+");
-  fseek(fProdutos, sizeof(struct dadosProd), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nomeprod;
-  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
-  {
-    achou = strcmp(Produto.nomeprod, nomeprod);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Produto.nomeprod);
-      printf("\n O Codigo é................:%d", Produto.codprod);
-      printf("\n O Valor Unitario é........:%0.2f", Produto.valorUniprod);
-      printf("\n_____________________________________________\n");
-      getch();
-      localizou = 0;
-    }
-  }
-
-  if (localizou == 1)
-  {
-    printf("\n Produto nÒo Cadastrado\n");
-    printf("\n Cadastrar Produto <S> ou <N>:");
-    op = toupper(op);
-    if (op == 'S')
-    {
-      cadastrarProduto();
-    }
-    else
-    {
-      fclose(fProdutos);
-    }
-    getch();
-  }
-}
-
-void aterarProduto()
-{
-  char nomeprod[30];
-  int achou;
-  int pos = 0;
-  system("cls");
-  fProdutos = fopen("produto.dat", "r+");
-  fseek(fProdutos, sizeof(struct dadosProd), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nomeprod;
-  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
-  {
-    achou = strcmp(Produto.nomeprod, nomeprod);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Produto.nomeprod);
-      printf("\n O Codigo é................:%d", Produto.codprod);
-      printf("\n O Valor Unitario é........:%0.2f", Produto.valorUniprod);
-      printf("_____________________________________________\n");
-      printf("Digite <enter> para continuar e alterar____________\n");
-      getch();
-      printf("\n Digite a alterþÒo do nome do produto: %s", Produto.nomeprod);
-      cin >> Produto.nomeprod;
-      printf("\n Digite o codigo do produto:");
-      cin >> Produto.codprod;
-      printf("\n Digite o valor unitario do produto:");
-      cin >> Produto.valorUniprod;
-      fseek(fProdutos, pos * sizeof(struct dadosProd), SEEK_SET);
-      fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
-      fseek(fProdutos, sizeof(struct dadosProd), SEEK_END);
-    }
-    printf("Digite <enter> para continuar___________________\n");
-    getch();
-  }
-  fclose(fProdutos);
-}
-
-void excluirProduto()
-{
-  char nomeprod[30];
-  int achou = 1;
-  int tamanhoAuxiliar = 0;
-  int tamanhoProduto = 0;
-
-  system("cls");
-  fProdutos = fopen("produto.dat", "r+");
-  fseek(fProdutos, sizeof(struct dadosProd), 0);
-  cria_arqAuxProd();
-  fAuxProd = fopen("auxProd.dat", "r+");
-  fseek(fAuxProd, sizeof(struct dadosProd), 0);
-  printf("\n Digite o Nome do Produto p/ Procura : ");
-  cin >> nomeprod;
-  while (fread(&Produto, sizeof(Produto), 1, fProdutos) == 1)
-  {
-    achou = strcmp(Produto.nomeprod, nomeprod);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Produto.nomeprod);
-      printf("\n A Codigo do Produto................:%d", Produto.codprod);
-      printf("\n O Salßrio Bruto é........:%0.2f", Produto.valorUniprod);
-      printf("_____________________________________________\n");
-      getch();
-    }
-    else
-    {
-      tamanhoAuxiliar = tamanhoAuxiliar + fwrite(&Produto, sizeof(struct dadosProd), 1, fAuxProd);
-    }
-  }
-  fclose(fAuxProd);
-  fclose(fProdutos);
-  remove("produto.dat");
-  cria_arqProd();
-  fProdutos = fopen("produto.dat", "r+");
-  fseek(fProdutos, sizeof(struct dadosProd), 0);
-
-  fAuxProd = fopen("auxProd.dat", "r+");
-  fseek(fAuxProd, sizeof(struct dadosProd), 0);
-  while (fread(&Produto, sizeof(Produto), 1, fAuxProd) == 1)
-  {
-    tamanhoProduto = tamanhoProduto + fwrite(&Produto, sizeof(struct dadosProd), 1, fProdutos);
-  }
-  fclose(fAuxProd);
-  remove("auxProd.dat");
-  fclose(fProdutos);
-  printf("\n Produto ExcluÝdo - Digite <enter> para continuar___________________\n");
-  getch();
-}
-
-void excluirArquivoProduto()
-{
-  char op;
-  printf("\n Deleta Arquivo <S> ou <N>? ");
-  cin >> op;
-  op = toupper(op);
-  if (op == 'S')
-  {
-    remove("produto.dat");
-    printf("arquivo deletado");
-  }
-
-  else
-  {
-    printf("\n Arquivo nÒo foi deletado por sua opþÒo");
-    getch();
-  }
-  cria_arqProd();
-}
-void MenuProd()
-{
-  system("cls");
-  cria_arqProd();
-  printf("Menu de opcoes");
-  printf("\n");
-  printf("1 - Cadastrar Produto\n");
-  printf("2 - Consultar Listar todos os Produtos  \n");
-  printf("3 - Consultar Por Nome do Produto \n");
-  printf("4 - Alterar Registro do Produto \n");
-  printf("5 - Excluir Registro do Produto \n");
-  printf("6 - Exclui Arquivo total do Produto\n");
-  printf("7 - Voltar ao Menu principal \n");
-  printf("Digite uma opcao \n");
-  cin >> opc;
-  switch (opc)
-  {
-  case 1:
-    cadastrarProduto();
     break;
-  case 2:
-    consultarProdutos();
-    break;
-  case 3:
-    consultarNomeProduto();
-    break;
-  case 4:
-    aterarProduto();
-    break;
-  case 5:
-    excluirProduto();
-    break;
-  case 6:
-    excluirArquivoProduto();
-    break;
-  case 7:
-    menuPrincipal();
   }
 }
-// Fim produto
 
-void criarArquivoFuncionario()
-{
-  if ((fFuncionarios = fopen("funcionario.dat", "a")) == NULL)
-  {
-    printf("\n Erro de criaþÒo do arquivo Funcionario");
-    return;
-  }
-  printf("\n Arquivo Produto Criado");
-  fclose(fFuncionarios);
-}
-
-void cria_arqAuxFunc()
-{
-  if ((fAuxFunc = fopen("auxFunc.dat", "a")) == NULL)
-  {
-    system("cls");
-    printf("\n Erro de criaþÒo de arquivo AuxFunc");
-    return;
-  }
-  printf("\n Arquivo AuxFunc Criado");
-  fclose(fAuxFunc);
-}
-
-void cadastrarFuncionario()
-{
-  char op;
-  system("cls");
-  int tamanho = 0;
-  fFuncionarios = fopen("funcionario.dat", "r+");
-  rewind(fFuncionarios);
-  do
-  {
-    fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios);
-    tamanho++;
-  } while (!feof(fFuncionarios));
-
-  fseek(fFuncionarios, sizeof(Funcionario), tamanho);
-  do
-  {
-    system("cls");
-
-    cout << "\n Digite o nome do Funcionario:";
-    cin >> Funcionario.nomeFunc;
-    printf("\n Digite o endereco do Funcionario:");
-    cin >> Funcionario.endeFunc;
-    printf("\n Digite o Email do Funcionario:");
-    cin >> Funcionario.emailFunc;
-    printf("\n Digite o CPF do Funcionario:");
-    cin >> Funcionario.CPFF;
-    printf("\n Digite o salario do Funcionario:");
-    cin >> Funcionario.salario;
-    tamanho = tamanho + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
-
-    printf("\n Continuar cadastrando <S> ou <N>:");
-    cin >> op;
-    op = toupper(op);
-  } while (op == 'S');
-  fclose(fFuncionarios);
-}
-
-void consultarFuncionario()
+void menuFuncionario()
 {
   system("cls");
-  fFuncionarios = fopen("funcionario.dat", "r");
-  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
-
-  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
-  {
-    system("cls");
-    printf("Nome Funcionario :        %s\n", Funcionario.nomeFunc);
-    printf("Endereco Funcionario :       %s\n", Funcionario.endeFunc);
-    printf("Email Funcionario:     %s\n", Funcionario.emailFunc);
-    printf("CPF Funcionario:     %s\n", Funcionario.CPFF);
-    printf("Salario Funcionario:     %.2f\n", Funcionario.salario);
-    printf("\n Digite enter para continuar\n");
-    getch();
-  }
-  printf("\n fim do arquivo");
-  fclose(fFuncionarios);
-  getch();
-}
-
-void consultarNomeFuncionario()
-{
-
-  char nomeFunc[20];
-  int achou = 1;
-  int localizou = 1;
-  char op;
-
-  system("cls");
-  fFuncionarios = fopen("funcionario.dat", "r+");
-  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nomeFunc;
-  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
-  {
-    achou = strcmp(Funcionario.nomeFunc, nomeFunc);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Funcionario.nomeFunc);
-      printf("\n O Endereco é................:%s", Funcionario.endeFunc);
-      printf("\n O Email é........:%s", Funcionario.emailFunc);
-      printf("\n O CPF é........:%s", Funcionario.CPFF);
-      printf("\n O Salario é........:%.2f", Funcionario.salario);
-      printf("\n_____________________________________________\n");
-      getch();
-      localizou = 0;
-    }
-  }
-
-  if (localizou == 1)
-  {
-    printf("\n Funcionario nÒo Cadastrado\n");
-    printf("\n Cadastrar Funcionario <S> ou <N>:");
-    op = toupper(op);
-    if (op == 'S')
-    {
-      cadastrarFuncionario();
-    }
-    else
-    {
-      fclose(fFuncionarios);
-    }
-    getch();
-  }
-}
-
-void alterarFunciconario()
-{
-  char nomeFunc[20];
-  int achou;
-  int pos = 0;
-  system("cls");
-  fFuncionarios = fopen("funcionario.dat", "r+");
-  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
-  printf("\n Digite o Nome p/ Procura : ");
-  cin >> nomeFunc;
-  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
-  {
-    achou = strcmp(Funcionario.nomeFunc, nomeFunc);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Funcionario.nomeFunc);
-      printf("\n O Endereco é................:%s", Funcionario.endeFunc);
-      printf("\n O Email é........:%s", Funcionario.emailFunc);
-      printf("\n O CPF é........:%s", Funcionario.CPFF);
-      printf("\n O Salario é........:%.2f", Funcionario.salario);
-      printf("_____________________________________________\n");
-      printf("Digite <enter> para continuar e alterar____________\n");
-      getch();
-      printf("\n Digite a alterþÒo do nome do Funcionario: %s", Funcionario.nomeFunc);
-      cin >> Funcionario.nomeFunc;
-      printf("\n Digite o endereco do funcionario:");
-      cin >> Funcionario.endeFunc;
-      printf("\n Digite o email do funcionario:");
-      cin >> Funcionario.emailFunc;
-      printf("\n Digite o CPF do funcionario:");
-      cin >> Funcionario.CPFF;
-      printf("\n Digite o salario do funcionario:");
-      cin >> Funcionario.salario;
-      fseek(fFuncionarios, pos * sizeof(struct dadosFunc), SEEK_SET);
-      fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
-      fseek(fFuncionarios, sizeof(struct dadosFunc), SEEK_END);
-    }
-    printf("Digite <enter> para continuar___________________\n");
-    getch();
-  }
-  fclose(fFuncionarios);
-}
-
-void excluirFuncionario()
-{
-  char nomeFunc[20];
-  int achou = 1;
-  int tamanhoAuxiliar = 0;
-  int tamanhoFuncionario = 0;
-
-  system("cls");
-  fFuncionarios = fopen("funcionarios.dat", "r+");
-  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
-  cria_arqAuxFunc();
-  fAuxFunc = fopen("auxFunc.dat", "r+");
-  fseek(fAuxFunc, sizeof(struct dadosFunc), 0);
-  printf("\n Digite o Nome do Funcionario p/ Procura : ");
-  cin >> nomeFunc;
-  while (fread(&Funcionario, sizeof(Funcionario), 1, fFuncionarios) == 1)
-  {
-    achou = strcmp(Funcionario.nomeFunc, nomeFunc);
-    if (achou == 0)
-    {
-      printf("\n O Nome é.................:%s", Funcionario.nomeFunc);
-      printf("\n O Endereco do Funcionario................:%s", Funcionario.endeFunc);
-      printf("\n O Email do Funcionario........:%s", Funcionario.emailFunc);
-      printf("\n O CPF do Funcionario........:%s", Funcionario.CPFF);
-      printf("\n O Salario do Funcionario........:%.2f", Funcionario.salario);
-      printf("_____________________________________________\n");
-      getch();
-    }
-    else
-    {
-      tamanhoAuxiliar = tamanhoAuxiliar + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fAuxFunc);
-    }
-  }
-  fclose(fAuxFunc);
-  fclose(fFuncionarios);
-  remove("Funcionarios.dat");
-  criarArquivoFuncionario();
-  fFuncionarios = fopen("funcionarios.dat", "r+");
-  fseek(fFuncionarios, sizeof(struct dadosFunc), 0);
-
-  fAuxFunc = fopen("auxFunc.dat", "r+");
-  fseek(fAuxFunc, sizeof(struct dadosFunc), 0);
-  while (fread(&Funcionario, sizeof(Funcionario), 1, fAuxFunc) == 1)
-  {
-    tamanhoFuncionario = tamanhoFuncionario + fwrite(&Funcionario, sizeof(struct dadosFunc), 1, fFuncionarios);
-  }
-  fclose(fAuxFunc);
-  remove("auxFunc.dat");
-  fclose(fFuncionarios);
-  printf("\n Produto ExcluÝdo - Digite <enter> para continuar___________________\n");
-  getch();
-}
-
-void excluirArquivoFuncionario()
-{
-  char op;
-  printf("\n Deleta Arquivo <S> ou <N>? ");
-  cin >> op;
-  op = toupper(op);
-  if (op == 'S')
-  {
-    remove("funcionarios.dat");
-    printf("arquivo deletado");
-  }
-
-  else
-  {
-    printf("\n Arquivo nÒo foi deletado por sua opþÒo");
-    getch();
-  }
-  criarArquivoFuncionario();
-}
-void MenuFunc()
-{
-  system("cls");
-  criarArquivoFuncionario();
-  printf("Menu de opcoes");
-  printf("\n");
-  printf("1 - Cadastrar Funcionario\n");
-  printf("2 - Consultar Listar todos os Funcionarios  \n");
-  printf("3 - Consultar Por Nome do Funcionario \n");
-  printf("4 - Alterar Registro do Funcionario \n");
-  printf("5 - Excluir Registro do Funcionario \n");
-  printf("6 - Exclui Arquivo total do Funcionario\n");
-  printf("7 - Voltar ao Menu principal \n");
-  printf("Digite uma opcao \n");
+  printf("\nMenu Funcion�rio: \n");
+  printf("\n1 - Cadastrar Funcion�rio");
+  printf("\n2 - Consultar todos os Funcion�rios");
+  printf("\n3 - Consultar Funcion�rio Por Nome");
+  printf("\n4 - Alterar um Registro de um Funcion�rio");
+  printf("\n5 - Excluir um Registro de um Funcion�rio");
+  printf("\n6 - Excluir todo o Arquivo Funcion�rios");
+  printf("\n7 - Voltar ao Menu Principal\n");
+  printf("\nDigite uma op��o: ");
   cin >> opc;
   switch (opc)
   {
@@ -1166,63 +1171,72 @@ void MenuFunc()
     consultarNomeFuncionario();
     break;
   case 4:
-    alterarFunciconario();
+    alterarFuncionario();
     break;
   case 5:
-    excluirFuncionario();
+    exlcuirFuncionario();
     break;
   case 6:
     excluirArquivoFuncionario();
     break;
   case 7:
     menuPrincipal();
+    break;
   }
 }
-// fim funcionarios
 
-// Menu principal
-void menuPrincipal()
+void menuProdutos()
 {
-  void MenuCli();
-  void MenuFunc();
-  void MenuForn();
-  void MenuProd();
   system("cls");
-  printf("Menu de opcoes");
-  printf("\n");
-  printf("1 - Clientes\n");
-  printf("2 - Funcionßrios\n");
-  printf("3 - Fornecedores\n");
-  printf("4 - Produtos\n");
-  printf("5 - Sair do Sistema\n");
-  printf("Digite uma opcao \n");
+  printf("\nMenu Produto: \n");
+  printf("\n1 - Cadastrar Produto");
+  printf("\n2 - Consultar todos os Produtos");
+  printf("\n3 - Consultar Produto Por Nome");
+  printf("\n4 - Alterar um Registro de um Produto");
+  printf("\n5 - Excluir um Registro de um Produto");
+  printf("\n6 - Excluir todo o Arquivo Produtos");
+  printf("\n7 - Voltar ao Menu Principal\n");
+
+  printf("\nDigite uma op��o: ");
   cin >> opc;
   switch (opc)
   {
   case 1:
-    MenuCli();
+    cadastrarProduto();
     break;
   case 2:
-    MenuFunc();
+    consultarProduto();
     break;
   case 3:
-    MenuForn();
+    consulta_nomeProd();
     break;
   case 4:
-    MenuProd();
+    alterarProduto();
     break;
   case 5:
-    exit(0);
+    excluirProduto();
+    break;
+  case 6:
+    exlcuirArquivoProduto();
+    break;
+  case 7:
+    menuPrincipal();
     break;
   }
 }
+
 main()
 {
   setlocale(LC_ALL, "portuguese");
   system("cls");
+  criaArquivoCliente();
+  criaArquivoFornecedor();
+  criaArquivoFuncionario();
+  criaArquivoProduto();
   opc = 1;
   do
   {
     menuPrincipal();
+
   } while (opc != 5);
 }
